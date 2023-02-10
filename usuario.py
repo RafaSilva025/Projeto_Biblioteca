@@ -1,21 +1,54 @@
-import string
-import random
+# importando sqlite
+import sqlite3
 
-class Usuario:
-    id = 0 
-    def __init__(self, nome, email, cpf):
-        self.__nome = nome
-        self.__email = email
-        self.__cpf = cpf
-        Usuario.id += 1
-        
-        
-def cadastrarUsuario(self, nome, email, cpf):
-    novousuario = Usuario(nome, email, cpf)
-    self.__Arvoreusuario.adicionar(int(cpf), novousuario)
-    print("O usuario: " + nome + " foi cadastrado com sucesso")
+# criando conexao
+banco = sqlite3.connect("usuario.db")
+
+# inserir dados
+def inserir_form(i):
+    with banco:
+        cur = banco.cursor()
+        query = "INSERT INTO Usuario(nome, email) VALUES(?,?)"
+        cur.execute(query,i)
+
+# Atualizar dados
+def atualizar_form(i):
+    with banco:
+        cur = banco.cursor()
+        query = "UPDATE Usuario SET nome=?, email=?, WHERE id=? "
+        cur.execute(query, i)
+
+# Deletar dados
+def deletar_form(i):
+    with banco:
+        cur = banco.cursor()
+        query = "DELETE FROM Usuario WHERE id=?"
+        cur.execute(query,i)
+
+# Ver dados
+def ver_form():
+    ver_dados = []
+    with banco:
+        cur = banco.cursor()
+        query = "SELECT * FROM Usuario"
+        cur.execute(query)
+
+        rows = cur.fetchall()
+        for row in rows:
+            ver_dados.append(row)
+    return ver_dados        
 
 
-def descadastrarUsuario(self, cpf):
-    pass
+# Ver dados
+def ver_item(id):
+    ver_dados_individual = []
+    with banco:
+        cur = banco.cursor()
+        query = "SELECT * FROM Usuario WHERE id=?"
+        cur.execute(query,id)
+
+        rows = cur.fetchall()
+        for row in rows:
+            ver_dados_individual.append(row)
+
 
