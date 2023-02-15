@@ -1,43 +1,15 @@
+import datetime as dt
+import datetime
+# Data atual
+data_atual = datetime.date.today()
 
-'''#VALIDADOR DE CPF
-def quantidade():
-    if len(verificacao_usuario) <11 or len(verificacao_usuario) > 11:
-        #print(f"O CPF é invalido pois nele há {len(verificacao_usuario)} caracteres")
-        return False
-    else:
-        return True   ''' 
-        
-        '''if quantidade() == False:
-    print("CPF é invalido!")
-else:
-    usuario = cursor'''
+# Data do empréstimo
+data_emprestimo_str = input("Informe a data que você retirou o(s) livro(s) - (DIA/MES/ANO): ")
+data_emprestimo_str = dt.datetime.strptime(data_emprestimo_str, '%d/%m/%Y')
+print(data_emprestimo_str.date())
+ano, mes, dia = data_emprestimo_str.year, data_emprestimo_str.month, data_emprestimo_str.day
+dia_emprestimo = dt.date(ano, mes, dia)
 
-'''
-    def devolucao(self, userKey, livroKey):
-        livroKey = geradorCodigo(livroKey)
-        usuario = self.__Arvoreusuario.pesquisar(int(userKey))
-        livro = self.__Arvorelivro.pesquisar(int(livroKey))
-        nomeLivro = self.__Arvorelivro.pesquisar(int(livroKey)).getValor()
-        if usuario != None and livro != None:
-            if nomeLivro in usuario.getValor().getListaLivros():
-                indice = usuario.getValor().getListaLivros().index(nomeLivro)
-                usuario.getValor().removeLivroListaLivros(indice)
-                livro.getValor().setSituacao(True)
-                hj = livro.getValor().strHoje()
-                ft = livro.getValor().strFuturo()
-                if hj < ft:
-                    printar = "Você devolveu na data prevista e não gerou multas"
-                else:
-                    multa = hj - ft
-                    printar = "Você não entregou na data prevista, entao sua multa é de" + \
-                        str(multa)
-                print(printar)
-                return
-            else:
-                print("O usuário não pode devolver um livro que não possui")
-
-
-def verificando_emprestimo(self):
-    pass
-'''
-# criar uma avaliação sobre a biblioteca!!''
+# Verifica se já se passaram 14 dias desde a data do empréstimo
+dias_passados = (data_atual - dia_emprestimo).days
+print(dias_passados)

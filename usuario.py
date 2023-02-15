@@ -52,3 +52,16 @@ def ver_item(id):
             ver_dados_individual.append(row)
 
 
+# VALIDADOR DE CPF
+def quantidade():
+    if len(verificacao_usuario) < 11 or len(verificacao_usuario) > 11:
+        # print(f"O CPF é invalido pois nele há {len(verificacao_usuario)} caracteres")
+        return False
+    else:
+        return True
+
+
+if quantidade() == False:
+    print("CPF é invalido!")
+else:
+    usuario = cursor
