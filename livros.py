@@ -1,9 +1,10 @@
+from validate_docbr import CPF
 import sqlite3
 import datetime as dt
 import datetime
 import time
 
-# Função para exibir a tela de bem-vindo
+
 def bem_vindo():
     print("*********************************")
     print("***********BEM VINDO!************")
@@ -12,41 +13,52 @@ def bem_vindo():
     cadastro()
 
 # Função para o cadastro de usuários
+
 def cadastro():
     con = sqlite3.connect('user.db')
     cursor = con.cursor()
-    #cursor.execute("CREATE TABLE user (nome text, cpf text, telefone text)")
-
+    # cursor.execute("CREATE TABLE user (nome text, cpf text, telefone text)")
 
 # VERIFICAÇÂO DE USUARIO
     print("Informe seu CPF cadastrado, para acessar a biblioteca, caso nao tenha ou digite um CPF irregular, irá automaticamente pra tela de cadastro!")
     verificacao_usuario = str(input("-")).replace('.', '').replace('-', '')
 
-    for dados_banco in cursor.execute(f'''SELECT nome, cpf, telefone FROM user'''):
-        if verificacao_usuario != dados_banco[1]:
-            dados()
-        else:
-            print(f"\nSeja Bem-Vindo")
-    print("Perfeito, usuario cadastrado, vamos prossegir...\n")
-    opcoes()
+    cpf_list = [row[0] for row in cursor.execute('SELECT cpf FROM user')]
+    if verificacao_usuario not in cpf_list:
+        print("CPF não encontrado.")
+        dados()
+    else:
+        print(f"\nSeja Bem-Vindo")
+        print("Perfeito, usuario cadastrado, vamos prossegir...\n")
+        opcoes()
 
 
 def dados():
-    con = sqlite3.connect('user')
-    cursor = con.cursor()
-    print("\n------CADASTRO------")
-    nome = str(input("Digite seu nome:")).title()
-    cpf = str(input("Digite seu CPF:"))
-    telefone = str(input("Digite seu Telefone/Celular:"))
-    cursor.execute(f"INSERT OR REPLACE INTO user VALUES ((?, ?, ?) '{nome}' , '{cpf}' , '{telefone}')")
-    time.sleep(3)
-    print("Cadastro Efetuado com Sucesso")
+    try:
+        con = sqlite3.connect('user.db')
+        cursor = con.cursor()
+        print("\n------CADASTRO------")
+        nome = str(input("Digite seu nome:")).title()
+        cpf = str(input("Digite seu CPF:")).replace('.', "").replace('-', "")
+        if not CPF().validate(cpf):
+            print("CPF inválido, tente novamente...")
+            return    
+        telefone = str(input("Digite seu Telefone/Celular:"))
+        cursor.execute(f"""INSERT INTO user (nome, cpf, telefone) 
+        VALUES ('{nome}' , '{cpf}', '{telefone}')""")
     # Salva as alterações
-    con.commit()
+        con.commit()
     # Fecha a conexão com o banco de dados
-    con.close()
+        con.close()
+        time.sleep(2)
+        print("Cadastro Efetuado com Sucesso")
+        
+    except sqlite3.Error as erro:
+        print("Erro ao cadastrar: ",erro)
 
 # CATALAGOS DOS LIVROS
+
+
 def catalogo_livro():
     global comedia
     comedia = ['Livro 01-A Extraordinária Viagem do Faquir Que Ficou Preso Em um Armário Ikea',
@@ -80,15 +92,18 @@ def catalogo_livro():
     ficcao = ['Livro 01-A CURVA DO SONHO', 'Livro 02-A DIABÓLICA', 'Livro 03-A ESTRELA MAIS ESCURA', 'Livro 04-A MÃO ESQUERDA DA ESCURIDÃO', 'Livro 05-A MÁQUINA DO TEMPO', 'Livro 06-A MENINA QUE TINHA DONS', 'Livro 07-A PERGUNTA E A RESPOSTA', 'Livro 08-A QUINTA ESTAÇÃO E O PORTÃO DO OBELISCO', 'Livro 09-A SEGUNDA AURORA', 'Livro 10-ATRAVÉS DO VAZIO', 'Livro 11-AURORA ARDE, CONTINUAÇÃO DAS AVENTURAS DE UM ESQUADRÃO DE HERÓIS', 'Livro 12-AURORA ASCENDE', 'Livro 13-BABEL-17 E ESTRELA IMPERIAL',
               'Livro 14-BINTI(TRILOGIA COMPLETA)', 'Livro 15-CIDADE DA MEIA-NOITE', 'Livro 16-CIDADE NAS NUVENS', 'Livro 17-CINDER', 'Livro 18-DESAFIANDO AS ESTRELAS', 'Livro 19-DESPERTAR', 'Livro 20-DEVORADORES DE ESTRELAS', 'Livro 21-DORMIR EM UM MAR DE ESTRELAS', 'Livro 22-DUNA(LIVRO+HQ)', 'Livro 23-É ASSIM QUE SE PERDE A GUERRA DO TEMPO', 'Livro 24-ESPERE AGORA PELO ANO PASSADO', 'Livro 25-FLORES PARA ALGERNON', 'Livro 26-FLORES PARA ALGERNON, MAIS CINCO MOTIVOS PARA LER', 'Livro 27-FORWARD']
 
-#OPÇÔES DA INTERFACE
+# OPÇÔES DA INTERFACE
+
+
 def opcoes():
-    opcao = int(input('SELECIONE OQUE VOCÊ IRÁ FAZER! \n 1- Empréstimo Livro(s) \n 2- Devolução Livro(s)\n 3- Cadastro de Usuario\n 4- Fim \n 5- Avaliar Biblioteca \n\n'))
+    opcao = int(input('SELECIONE OQUE VOCÊ IRÁ FAZER! \n 1- Empréstimo Livro(s) \n 2- Devolução Livro(s)\n 3- Cadastrar Novo Usuario \n 4- Sair \n 5- Avaliar Biblioteca \n\n'))
     if (opcao == 1):
         genero = int(input("\nMuito bem, selecione o Genero do(s) Livro(s): \n 1- Humor\n 2- Romance\n 3- Educação\n 4- Livros infantis/gibis\n 5- Aventura \n 6- Terror\n 7- Suspense/Drama\n 8- Ficção-Científica\n"))
         if (genero == 1):
             print("#"*40)
             print("\n".join(comedia))
-            emprestimo_comedia = int(input("\n Temos essas opções para emprestimo, digite o numero do Livro que voce quer retirar: #só numero, exemplo - (02)\n"))
+            print("\nCaso for retirar mais de um livro, comece a seleção deles em 'ORDEM DECRESCENTE'")
+            emprestimo_comedia = int(input("Temos essas opções para emprestimo, digite o numero do Livro que voce quer retirar: #só numero, exemplo - (02)\n"))
             # Removendo o livro da Lista
             while emprestimo_comedia in range(1, 28):
                 comedia.pop(emprestimo_comedia-1)
@@ -101,11 +116,11 @@ def opcoes():
                     emprestimo_comedia = int(input("\n Temos essas opções para emprestimo, digite o numero do Livro que voce quer retirar: #só numero, exemplo - (02)\n"))
                 else:
                     print("\nObrigado, e volte sempre!")
-                    data_emprestimo()        
+                    data_emprestimo()
                     break
             else:
-                print("O numero digitado nao consta na lista, Por favor digite Novamente outro número!")
-
+                print(
+                    "O numero digitado nao consta na lista, Por favor digite Novamente outro número!")
 
         elif (genero == 2):
             print("#"*40)
@@ -123,7 +138,7 @@ def opcoes():
                     emprestimo_romance = int(input("\n Temos essas opções para emprestimo, digite o numero do Livro que voce quer retirar: #só numero, exemplo - (02)\n"))
                 else:
                     print("Obrigado, e volte sempre!")
-                    data_emprestimo()        
+                    data_emprestimo()
                     break
             else:
                 print("O numero digitado nao contem na lista, Por favor digite Novamente outro número!")
@@ -178,7 +193,8 @@ def opcoes():
                 print("\n".join(aventura))
                 print("\nLivro retirado com sucesso!")
                 time.sleep(3)
-                continua=input("\nVoce deseja retirar mais algum livro?[S/N]\n").lower()
+                continua = input(
+                    "\nVoce deseja retirar mais algum livro?[S/N]\n").lower()
                 if continua == "s":
                     emprestimo_aventura = int(input("\n Temos essas opções para emprestimo, digite o numero do Livro que voce quer retirar: #só numero, exemplo - (02)\n"))
                 else:
@@ -238,32 +254,35 @@ def opcoes():
                 print("\n".join(ficcao))
                 print("\nLivro retirado com sucesso!")
                 time.sleep(3)
-                continua = input("\nVoce deseja retirar mais algum livro?[S/N]\n").lower()
+                continua = input(
+                    "\nVoce deseja retirar mais algum livro?[S/N]\n").lower()
                 if continua == "s":
-                    emprestimo_ficcao = int(input("\n Temos essas opções para emprestimo, digite o numero do Livro que voce quer retirar: #só numero, exemplo - (02)\n"))
+                    emprestimo_ficcao = int(input(
+                        "\n Temos essas opções para emprestimo, digite o numero do Livro que voce quer retirar: #só numero, exemplo - (02)\n"))
                 else:
                     print("Obrigado, e volte sempre!")
                     data_emprestimo()
                     break
             else:
-                print("O numero digitado nao contem na lista, Por favor digite Novamente outro número!")
+                print(
+                    "O numero digitado nao contem na lista, Por favor digite Novamente outro número!")
 
 # DEVOLUÇÂO DE LIVROS
     if (opcao == 2):
 
         # Data atual
         data_atual = datetime.date.today()
-    
+
         # Data do empréstimo
         data_emprestimo_str = input("Informe a data que você retirou o(s) livro(s) - (DIA/MES/ANO): ")
         data_emprestimo_str = dt.datetime.strptime(data_emprestimo_str, '%d/%m/%Y')
         print(data_emprestimo_str.date())
         ano, mes, dia = data_emprestimo_str.year, data_emprestimo_str.month, data_emprestimo_str.day
         dia_emprestimo = dt.date(ano, mes, dia)
-        
+
         # Verifica se já se passaram 14 dias desde a data do empréstimo
         dias_passados = (data_atual - dia_emprestimo).days
-        print(f"\nForam {dias_passados} dias desde que, foi feito o emprestimo")
+        print(f"\nForam {dias_passados} dias desde que, foi feito o emprestimo!")
         if dias_passados >= 14:
             print("Infelizmente, ja passou do prazo!")
             cpf = str(input("Informe seu CPF:")).replace('.', '').replace('-', '')
@@ -271,31 +290,37 @@ def opcoes():
                 print("CPF verificado... Infelizmente voce ficará 1 mes, sem poder pegar nenhum livro emprestado!\n")
                 time.sleep(2)
                 nome_livro = str(input("Digite o nome do livro que voce irá devolver:"))
-                print("O livro '" + nome_livro + "' foi devolvido com sucesso!")
+                print("O livro '" + nome_livro +"' foi devolvido com sucesso!")
                 verificacao = str(input("Tem mais algum livro pra ser devolvido?[S/N]\n")).upper()
                 while verificacao == 'S':
-                    nome_livro = str(input("Digite o nome do livro que voce irá devolver"))
+                    nome_livro = str(input("Digite o nome do livro que voce irá devolver:"))
                     print("O livro '" + nome_livro +"' foi devolvido com sucesso!")
                     verificacao = str(input("Tem mais algum livro pra ser devolvido?[S/N]\n")).upper()
 
                 else:
                     print("Muito obrigado por utilizar, a Biblioteca...")
-                    
+
             else:
-                print("CPF invalido, por favor insira seu CPF novamente, os 11 digitos.. ")
-                
-                    
+                print(
+                    "CPF invalido, por favor insira seu CPF novamente, os 11 digitos.. ")
+
         else:
-            nome_livro = str(input("Digite o nome do livro que voce irá devolver"))
+            nome_livro = str(
+                input("Digite o nome do livro que voce irá devolver:"))
             print("O livro '" + nome_livro + "' foi devolvido com sucesso!")
-            verificacao = str(input("Tem mais algum livro pra ser devolvido?[S/N]\n")).upper()
+            verificacao = str(
+                input("Tem mais algum livro pra ser devolvido?[S/N]\n")).upper()
             while verificacao == 'S':
-                nome_livro = str(input("Digite o nome do livro que voce irá devolver"))
-                print("O livro '" + nome_livro + "' foi devolvido com sucesso!")
-                verificacao = str(input("Tem mais algum livro pra ser devolvido?[S/N]\n")).upper()
+                nome_livro = str(
+                    input("Digite o nome do livro que voce irá devolver:"))
+                print("O livro '" + nome_livro +
+                      "' foi devolvido com sucesso!")
+                verificacao = str(
+                    input("Tem mais algum livro pra ser devolvido?[S/N]\n")).upper()
             else:
                 print("Muito obrigado por utilizar, a Biblioteca... Volte Sempre")
-                print("Quem lê expande as próprias ideias e se transporta para outros mundos.")
+                print(
+                    "Quem lê expande as próprias ideias e se transporta para outros mundos.")
 
 # CADASTRO USUARIO
     if (opcao == 3):
@@ -324,8 +349,19 @@ def opcoes():
                 print("O atendimento na biblioteca foi perfeito.")
         else:
             print("Por favor, avalie o atendimento na biblioteca de 1 a 10.")
-            
 
+
+#CRIANDO A DATA QUE VAI SER DEFINIDA QUANTOS DIAS DURARÁ O EMPRESTIMO!
+def data_emprestimo():
+    hoje = datetime.date.today()
+    delta = datetime.timedelta(days=14)
+    devolucao = hoje + delta 
+    print(f"A data que vocẽ está retirando o livro(s) é o dia: {hoje.day}/{hoje.month}/{hoje.year}!!!\n")
+    print("--"*30)
+    print(f"######## A devolução tem que ocorrer até o dia: {devolucao.day}/{devolucao.month}/{devolucao.year}!!! ########\n")
+    print("--"*30)
+    print("Caso não ocorra, terá seu CPF bloqueado na Biblioteca!")
+    
 # CATALAGOS DOS LIVROS
 catalogo_livro()
 
@@ -334,5 +370,4 @@ catalogo_livro()
 if __name__ == '__main__':
     bem_vindo()
 
-#arrumar o banco 
-#arrumar as listas dos livros
+# arrumar as listas dos livros
