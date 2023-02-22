@@ -369,5 +369,3 @@ catalogo_livro()
 
 if __name__ == '__main__':
     bem_vindo()
-
-# arrumar as listas dos livros
